@@ -139,4 +139,32 @@ contract AMM {
       token2Balance[msg.sender] += amountToken2;
 
    }
+
+   // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
+   function getSwapToken2Estimate(uint256 _amountToken2) public view activePool returns(uint256 amountToken1) {
+      uint256 token2After = totalToken2.add(_amountToken2);
+      uint256 token1After = K.div(token2After);
+      amountToken1 = totalToken1.sub(token1After);
+
+      // To ensure that Token1's pool is not completely depleted leading to inf:0 ratio
+      if(amountToken1 == totalToken1) amountToken1--;
+   }
+
+   // Returns the amount of Token2 that the user should swap to get _amountToken1 in return
+   function getSwapToken2EstimateGivenToken1(uint256 _amountToken1) public view activePool returns(uint256 amountToken2) {
+      require(_amountToken1 < totalToken1, "Insufficient pool balance");
+      uint256 token1After = totalToken1.sub(_amountToken1);
+      uint256 token2After = K.div(token1After);
+      amountToken2 = token2After.sub(totalToken2);
+   }
+
+   // Swaps given amount of Token2 to Token1 using algorithmic price determination
+   function swapToken2(uint256 _amountToken2) external activePool validAmountCheck(token2Balance, _amountToken2) returns(uint256 amountToken1) {
+      amountToken1 = getSwapToken2Estimate(_amountToken2);
+
+      token2Balance[msg.sender] -= _amountToken2;
+      totalToken2 += _amountToken2;
+      totalToken1 -= amountToken1;
+      token1Balance[msg.sender] += amountToken1;
+   }
 }
