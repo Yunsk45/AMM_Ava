@@ -124,4 +124,19 @@ contract AMM {
       uint256 token1After = K.div(token2after);
       _amountToken1 = token1After.sub(totalToken1);
    }
+
+
+   function swapToken1(uint256 _amountToken1) public external 
+                                              activePool validAmountCheck(token1Balance, _amountToken1) 
+                                              returns(uint256 amountToken2) {
+      amountToken2 = getSwapToken1Estimate(_amountToken1);
+
+      token1Balance[msg.sender] -= _amountToken1;
+
+      totalToken1 += _amountToken1;
+      totalToken2 -= amountToken2;
+
+      token2Balance[msg.sender] += amountToken2;
+
+   }
 }
