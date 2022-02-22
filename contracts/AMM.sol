@@ -72,4 +72,37 @@ contract AMM {
       totalShares += share;
       shares[msg.sender] += share;
    }
+
+
+   function getEquivalentToken1Estimate(uint256 _amountToken2) public view activePool returns(uint256 reqToken1) {
+      reqToken1 = totalToken1.mul(_amountToken2).div(totalToken2);
+   }
+   function getEquivalentToken2Estimate(uint256 _amountToken1) public view activePool returns(uint256 reqToken2) {
+      reqToken2 = totalToken2.mul(_amountToken1).div(totalToken1);
+   }
+   
+   function getWithdrawEstimate(uint256 _share) public biew activePool returns(uint256 amountToken1, uint256 amountToken2) {
+      require(_share <= totalShares, "Share should be less than totalShare");
+      amountToken1 = _share.mul(totalToken1).div(totalShares);
+      amountToken2 = _share.mul(totalToken2).div(totalShares);
+   }
+
+   function withdraw(uint256 _share) external activepool validAmountCheck(shares, _share) 
+                                     returns(uint256 amountToken1, uint256 amountToken2) {
+      
+      (amountToken1, amountToken2) = getWithdrawEstimate(_share);
+
+      shares[msg.sender] -= _share;
+      totalShares -= _share;
+
+      totalToken1 -= amountToken1;
+      totalToken2 -= amountToken2;
+      K = totalToken1.mul(totalToken2);
+
+      token1Balance[msg.sender] += amountToken1;
+      token2Balance[msg.sender] += amountToken2;
+
+
+   }
+
 }
