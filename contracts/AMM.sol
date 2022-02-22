@@ -105,4 +105,23 @@ contract AMM {
 
    }
 
+
+
+   //Swapping functions
+  function getSwapToken1Estimate(uint256 _amountToken1) public view activePool returns(uint256 amountToken2) {
+    uint256 token1After = totalToken1.add(_amountToken1);
+    uint256 token2After = K.div(token1After);
+    amountToken2 = totalToken2.sub(token2After);
+
+    // To ensure that Token2's pool is not completely depleted leading to inf:0 ratio
+    if(amountToken2 == totalToken2) amountToken2--;
+  } 
+
+  function getSwapToken1EstimateGivenToken2(uint256 _amountToken2) public view actovePool
+                                                                   returns(uint256 amountToken1) {
+      require(_amountToken2 < totalToken2, "Insufficient bool balance");
+      uint256 token2after = totalToken2.sub(_amountToken2);
+      uint256 token1After = K.div(token2after);
+      _amountToken1 = token1After.sub(totalToken1);
+   }
 }
