@@ -44,4 +44,32 @@ contract AMM {
       token1Balance[msg.sender] = token1Balance[msg.sender].add(_amountToken1);
       token2Balance[msg.sender] = token2Balance[msg.sender].add(_amountToken2);
    }
+
+
+   function provide(uint256 _amountToken1, uint256 _amountToken2) external 
+                                                                  validAmountCheck(token1Balance, _amountToken1)
+                                                                  validAmountCheck(token2Balance, _amountToken2) 
+                                                                  returns (uint256 share)
+                                                                  {
+
+      if(totalShares == 0) {
+         share = 100*PRECISION;
+      }
+      else {
+         uint256 share1 = totalShares.mul(_amountToken1).div(totalToken1);
+         uint256 share2 = totalShares.mul(_amountToken2).div(totalToken2);
+         require(share1 == share2, "Equivalent value of tokens not provided !");
+         share = share1;
+      }
+      require(share > 0, "Asset value less than thresold contrib");
+      token1Balance[msg.sender] -= amountToken1;
+      token2Balance[msg.sender] -= amountToken2; // preventing reentrancy attack by updating balances first.
+
+      totalToken1 += _amountToken1;
+      totalToken2 += _amountToken2;
+      K = totalToken1.mul(totalToken2); 
+
+      totalShares += share;
+      shares[msg.sender] += share;
+   }
 }
